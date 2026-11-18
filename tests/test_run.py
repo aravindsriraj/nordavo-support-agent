@@ -12,7 +12,7 @@ DEC = {"action": "reply", "body": {"language": "nl", "category": "question", "pr
 def test_log_line_masks_and_has_no_body():
     line = json.loads(run.log_line("T001", DEC, "posted"))
     assert set(line) == {"ts", "id", "language", "category", "priority", "action", "confidence", "faq_ids",
-                         "back_translation", "outcome", "error", "tokens"}
+                         "back_translation", "refusals", "outcome", "error", "tokens"}
     assert "[REDACTED]" in line["back_translation"] and "NL91" not in json.dumps(line)
 
 

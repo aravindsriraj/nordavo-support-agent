@@ -18,7 +18,7 @@ def log_line(ticket_id: str, decision: dict | None, outcome: str, error: str | N
         "language": b.get("language"), "category": b.get("category"), "priority": b.get("priority"),
         "action": d.get("action"), "confidence": b.get("confidence"), "faq_ids": d.get("faq_ids"),
         "back_translation": (d.get("verification") or {}).get("english_back_translation"),
-        "outcome": outcome, "error": error or d.get("error"), "tokens": d.get("tokens"),
+        "refusals": d.get("refusals"), "outcome": outcome, "error": error or d.get("error"), "tokens": d.get("tokens"),
     }
     # The whole line goes through the mask: no payment details in logs, ever. No ticket body is logged.
     return mask_payment(json.dumps(line, ensure_ascii=False))
