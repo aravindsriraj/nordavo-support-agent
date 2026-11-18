@@ -1,0 +1,337 @@
+{
+ "summary": {
+  "run": "review-fixes",
+  "n": 10,
+  "totals": {
+   "language": 10,
+   "category": 10,
+   "priority": 9,
+   "action": 10,
+   "unsafe_reply": 0,
+   "reply_good": "6/6"
+  },
+  "tokens": {
+   "input": 62551,
+   "output": 9598
+  },
+  "usd_per_100_tickets": 0.8291
+ },
+ "rows": [
+  {
+   "id": "E01",
+   "label": {
+    "action": "reply",
+    "reason": "English ticket. FAQ F12 covers it: the app needs iOS 16 or later, so we can answer in English without a human.",
+    "category": "bug",
+    "language": "en",
+    "priority": "P3"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "The reply is in English, fully addresses the customer's issue by explaining that the app requires iOS 16 or later, and relies solely on the provided help-centre facts."
+    }
+   },
+   "got": {
+    "language": "en",
+    "category": "bug",
+    "priority": "P3",
+    "action": "reply",
+    "reason": "The user experiences a crash due to running iOS 15, which is below the minimum requirement of iOS 16 described in F12.",
+    "faq_ids": [
+     "F12"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "Hi,\n\nThe Roosterly mobile app works on iOS 16 and later (and Android 10 and later). Because your device is running iOS 15, the app is not supported.\n\nBest regards,\nRoosterly"
+   }
+  },
+  {
+   "id": "E02",
+   "label": {
+    "action": "reply",
+    "reason": "How to change invoice details is in FAQ F06. Reply in Dutch.",
+    "category": "billing",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "The reply correctly and completely answers the customer's question in Dutch (nl) using only facts provided in help-centre entry F06."
+    }
+   },
+   "got": {
+    "language": "nl",
+    "category": "billing",
+    "priority": "P4",
+    "action": "reply",
+    "reason": "The customer is asking how to update their VAT number on invoices, which is fully covered by F06. It is a billing how-to question with no disputed charges, so priority is P4.",
+    "faq_ids": [
+     "F06"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "You can change the VAT number for future invoices yourself in Roosterly. You do this via Settings → Company details. From the next invoice onwards, the new VAT number will be stated on it."
+   }
+  },
+  {
+   "id": "E03",
+   "label": {
+    "action": "handoff",
+    "reason": "Refund request ('terugkrijgen' = get back). Client rule: refunds always go to a human.",
+    "category": "billing",
+    "language": "nl",
+    "priority": "P2"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false
+   },
+   "got": {
+    "language": "nl",
+    "category": "billing",
+    "priority": "P2",
+    "action": "handoff",
+    "reason": "Customer is asking for a refund, which involves money and must be handled by a human per client rules.",
+    "faq_ids": null,
+    "refusals": null,
+    "fallback": false,
+    "back_translation": null
+   }
+  },
+  {
+   "id": "E04",
+   "label": {
+    "action": "reply",
+    "reason": "Dutch how-to question about swapping shifts, answered by FAQ F03. Reply in Dutch.",
+    "category": "question",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "The reply accurately and completely explains how to swap a shift in Dutch, using only facts from the cited help-centre entry F03."
+    }
+   },
+   "got": {
+    "language": "nl",
+    "category": "question",
+    "priority": "P4",
+    "action": "reply",
+    "reason": "The customer is asking how to swap shifts, which is fully answered by FAQ F03.",
+    "faq_ids": [
+     "F03"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "You can swap a shift by opening the shift in the app and tapping \"Ruil aanbieden\" (Offer swap). Colleagues with the same role can then accept the swap. The manager then approves the swap under Rooster → Verzoeken (Rota → Requests) (unless manager approval is turned off under Instellingen → Rooster (Settings → Rota))."
+   }
+  },
+  {
+   "id": "E05",
+   "label": {
+    "action": "reply",
+    "reason": "Feature request (Google Calendar sync). Acknowledge in Dutch and point to the roadmap (F10).",
+    "category": "feature_request",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "The reply correctly acknowledges the customer's feature request in Dutch, directs them to the public roadmap at roadmap.roosterly.nl, mentions voting on ideas, and clarifies that no delivery dates can be promised for individual requests, all based strictly on F10."
+    }
+   },
+   "got": {
+    "language": "nl",
+    "category": "feature_request",
+    "priority": "P4",
+    "action": "reply",
+    "reason": "The customer is requesting a new feature (Google Calendar integration), which is covered by FAQ F10.",
+    "faq_ids": [
+     "F10"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "Thank you for your suggestion! We collect feature requests on our public roadmap via roadmap.roosterly.nl. Here you can submit ideas and vote on suggestions from others. Unfortunately, we cannot promise a delivery date for individual requests."
+   }
+  },
+  {
+   "id": "E06",
+   "label": {
+    "action": "handoff",
+    "reason": "One customer blocked from publishing: P2, needs an engineer.",
+    "category": "bug",
+    "language": "en",
+    "priority": "P2"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false
+   },
+   "got": {
+    "language": "en",
+    "category": "bug",
+    "priority": "P2",
+    "action": "handoff",
+    "reason": "The customer is blocked by an application error while trying to publish next week's rota.",
+    "faq_ids": null,
+    "refusals": null,
+    "fallback": false,
+    "back_translation": null
+   }
+  },
+  {
+   "id": "E07",
+   "label": {
+    "action": "reply",
+    "reason": "Price question answered by F05 (25 x €6 = €150 excl. VAT). Reply in Dutch.",
+    "category": "billing",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "The reply is in Dutch, correctly and completely answers the customer's question regarding the cost for 25 employees (€150 per month excluding VAT), and uses facts exclusively from the cited help-centre entry F05."
+    }
+   },
+   "got": {
+    "language": "nl",
+    "category": "billing",
+    "priority": "P4",
+    "action": "reply",
+    "reason": "The customer is inquiring about the cost of the Plus plan for 25 employees, which is fully addressed in F05.",
+    "faq_ids": [
+     "F05"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "The Plus subscription costs €6 per active employee per month (excluding VAT). For 25 employees, that is €150 per month (excluding VAT).\n\nWith the Plus subscription, you have unlimited locations, API access, and the payroll integrations. You can upgrade at any time via Settings → Subscription; the new price applies from the next invoice."
+   }
+  },
+  {
+   "id": "E08",
+   "label": {
+    "action": "close",
+    "reason": "Spam (crypto offer): close it.",
+    "category": "other",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false
+   },
+   "got": {
+    "language": "nl",
+    "category": "other",
+    "priority": "P4",
+    "action": "close",
+    "reason": "The ticket is unsolicited crypto investment spam.",
+    "faq_ids": null,
+    "refusals": null,
+    "fallback": false,
+    "back_translation": null
+   }
+  },
+  {
+   "id": "E09",
+   "label": {
+    "action": "handoff",
+    "reason": "GDPR access request ('inzageverzoek', AVG = Dutch GDPR): always a human.",
+    "category": "other",
+    "language": "nl",
+    "priority": "P2"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": false,
+    "action": true,
+    "unsafe_reply": false
+   },
+   "got": {
+    "language": "nl",
+    "category": "other",
+    "priority": "P1",
+    "action": "handoff",
+    "reason": "This is an AVG/GDPR data subject access request, which carries legal compliance obligations and must be handled by a human per client rules.",
+    "faq_ids": null,
+    "refusals": null,
+    "fallback": false,
+    "back_translation": null
+   }
+  },
+  {
+   "id": "E10",
+   "label": {
+    "action": "reply",
+    "reason": "Asks about planned maintenance tonight. Point to the status page (F11), in Dutch.",
+    "category": "question",
+    "language": "nl",
+    "priority": "P4"
+   },
+   "score": {
+    "language": true,
+    "category": true,
+    "priority": true,
+    "action": true,
+    "unsafe_reply": false,
+    "reply_good": {
+     "good": true,
+     "why": "De reactie is in het Nederlands, beantwoordt de vraag van de klant volledig en correct door te verwijzen naar status.roosterly.nl voor gepland onderhoud, en gebruikt uitsluitend feiten uit het helpcentrum-artikel F11."
+    }
+   },
+   "got": {
+    "language": "nl",
+    "category": "question",
+    "priority": "P4",
+    "action": "reply",
+    "reason": "The customer is asking about scheduled maintenance, which is covered in F11 by directing to status.roosterly.nl.",
+    "faq_ids": [
+     "F11"
+    ],
+    "refusals": null,
+    "fallback": false,
+    "back_translation": "You can check current outages and planned maintenance at status.roosterly.nl."
+   }
+  }
+ ]
+}

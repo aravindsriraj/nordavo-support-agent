@@ -32,3 +32,13 @@ def test_fallback_handoff_when_model_raises(monkeypatch):
         raise RuntimeError("model down")
     d, posts = run_with(monkeypatch, fake)
     assert [a for a, _ in posts] == ["handoff"] and d["fallback"] is True
+
+
+def test_helpdesk_error_is_raised_not_hidden_by_fallback(monkeypatch):
+    import pytest
+    from helpdesk import HelpdeskError
+
+    async def fake(ag, text):
+        raise HelpdeskError(503)
+    with pytest.raises(HelpdeskError):
+        run_with(monkeypatch, fake)

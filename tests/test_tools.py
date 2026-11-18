@@ -1,7 +1,8 @@
 from agent import load_faq, make_tools, mask_payment
 
 TICKET = {"id": "T001", "subject": "Wachtwoord", "body": "Hoe reset ik mijn wachtwoord?"}
-OK = {"english_back_translation": "x", "detected_language": "nl", "grounded_in_faq": True, "issue": ""}
+OK = {"english_back_translation": "x", "detected_language": "nl", "grounded_in_faq": True, "issue": "",
+      "sensitive_topics": []}
 CLOSE = dict(language="nl", category="other", priority="P4", reason="spam", confidence=0.9)
 BASE = dict(language="nl", category="question", priority="P4", reason="FAQ F01", confidence=0.9, sensitive_topics=[])
 
@@ -14,16 +15,18 @@ def setup(verdict=OK):
     return reply, handoff, close, posts, decision
 
 
-def test_load_faq_has_12_entries_and_rules():
+def test_load_faq_has_12_entries():
     faq = load_faq()
-    assert [f"F{i:02d}" for i in range(1, 13)] == sorted(k for k in faq if k != "RULES")
-    assert "refunds" in faq["RULES"]
+    assert sorted(faq) == [f"F{i:02d}" for i in range(1, 13)]
+    assert "Wachtwoord vergeten" in faq["F01"]
 
 
 def test_mask_payment():
     assert mask_payment("IBAN NL91ABNA0417164300 ok") == "IBAN [REDACTED] ok"
     assert mask_payment("kaart 4111 1111 1111 1111.") == "kaart [REDACTED]."
     assert mask_payment("T005 costs €4 per month, 12 users") == "T005 costs €4 per month, 12 users"
+    for raw in ("nl91abna0417164300", "NL91 ABNA 0417 1643 00", "NL91-ABNA-0417-1643-00", "NL91.ABNA.0417.1643.00", "4111.1111.1111.1111"):
+        assert mask_payment(f"pay {raw} now") == "pay [REDACTED] now", raw
 
 
 def test_reply_refused_for_sensitive_topic():
@@ -80,3 +83,17 @@ def test_handoff_note_masked():
     handoff(**{**BASE, "sensitive_topics": ["refund"]}, handoff_note="Refund to NL91ABNA0417164300")
     assert posts[0][1]["handoff_note"] == "Refund to [REDACTED]"
     assert set(posts[0][1]) == {"language", "category", "priority", "reason", "handoff_note", "confidence"}
+
+
+def test_reply_refused_after_any_refusal():
+    reply, handoff, _, posts, _ = setup()
+    reply(**{**BASE, "sensitive_topics": ["refund"]}, faq_ids=["F01"], draft_reply="Hoi")
+    r = reply(**BASE, faq_ids=["F01"], draft_reply="Hoi")  # model drops the topic and retries
+    assert r["status"] == "refused" and posts == []
+    assert handoff(**BASE, handoff_note="Refund request")["status"] == "done"
+
+
+def test_reply_refused_when_verifier_sees_sensitive_topic():
+    reply, *_, posts, _ = setup({**OK, "sensitive_topics": ["refund"]})
+    assert reply(**BASE, faq_ids=["F01"], draft_reply="Hoi")["status"] == "refused"
+    assert posts == []

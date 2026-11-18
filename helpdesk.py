@@ -1,5 +1,4 @@
 """Roosterly helpdesk client: auth, rate limit, retries, and the never-answer-twice guard."""
-import json
 import os
 import time
 
@@ -46,13 +45,16 @@ class Helpdesk:
             try:
                 r = self.client.request(method, path, json=json, params=params)
             except httpx.TransportError:
-                # Unknown whether a POST was saved; a retry then gets 409, which post_once treats as done.
-                if not backoff:
+                # A POST may have been saved: never resend it blindly, post_once checks the server instead.
+                if method != "GET" or not backoff:
                     raise HelpdeskError(0, {"error": "network"})
                 self.sleep(backoff.pop(0))
                 continue
             if r.status_code == 429:
-                self.sleep(float(r.headers.get("Retry-After", 1)))
+                try:
+                    self.sleep(float(r.headers.get("Retry-After", 1)))
+                except ValueError:  # HTTP-date form
+                    self.sleep(1)
                 continue
             if r.status_code == 503:
                 if not backoff:
@@ -90,36 +92,23 @@ class Helpdesk:
         return self.request("POST", "/practice/reset")
 
 
-class State:
-    """Local record of tickets we already answered. Survives crashes (atomic write)."""
+def post_once(hd: Helpdesk, ticket_id: str, action: str, body: dict) -> str:
+    """Post a decision unless the ticket was already answered. Returns 'posted' or 'already_handled'.
+    The helpdesk is the source of truth: open-ticket listing resumes after a crash, and this GET plus the
+    409 make sure a re-run or a lost response never answers a customer twice."""
+    def handled() -> bool:
+        return hd.get_ticket(ticket_id).get("handled") is not None  # "handled": null while open
 
-    def __init__(self, path: str = "state.json"):
-        self.path = path
-        self.data = json.load(open(path)) if os.path.exists(path) else {}
-
-    def done(self, id: str) -> bool:
-        return id in self.data
-
-    def mark(self, id: str, outcome: str) -> None:
-        self.data[id] = outcome
-        with open(self.path + ".tmp", "w") as f:
-            json.dump(self.data, f, indent=1)
-        os.replace(self.path + ".tmp", self.path)
-
-
-def post_once(hd: Helpdesk, state: State, ticket_id: str, action: str, body: dict) -> str:
-    """Post a decision unless this ticket was already answered. Returns 'posted' or 'already_handled'."""
-    if state.done(ticket_id):
-        return "already_handled"
-    if is_handled(hd.get_ticket(ticket_id)):  # covers a crash between POST and state write
-        state.mark(ticket_id, "already_handled")
+    if handled():
         return "already_handled"
     try:
         hd.post_action(ticket_id, action, body)
     except AlreadyHandled:
-        state.mark(ticket_id, "already_handled")
         return "already_handled"
-    state.mark(ticket_id, "posted")
+    except HelpdeskError as e:
+        if e.status == 0 and handled():  # response lost, but the POST was saved
+            return "already_handled"
+        raise
     return "posted"
 
 
@@ -128,8 +117,3 @@ def _json(r: httpx.Response) -> dict:
         return r.json()
     except ValueError:
         return {}
-
-
-def is_handled(ticket: dict) -> bool:
-    # GET /tickets/{id} returns "handled": null while the ticket is open.
-    return ticket.get("handled") is not None

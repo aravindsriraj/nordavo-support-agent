@@ -83,3 +83,18 @@ def test_min_interval_between_calls():
     hd.request("GET", "/status")
     hd.request("GET", "/status")
     assert any(0.2 < s <= 0.25 for s in sleeps)
+
+
+def test_post_transport_error_is_not_resent():
+    hd, calls = make([httpx.ConnectError("boom")], [])
+    with pytest.raises(HelpdeskError) as e:
+        hd.post_action("T001", "reply", {})
+    assert e.value.status == 0 and len(calls) == 1
+
+
+def test_429_unparseable_retry_after_waits_1s():
+    sleeps = []
+    hd, _ = make([httpx.Response(429, headers={"Retry-After": "Wed, 21 Oct 2026 07:28:00 GMT"}),
+                  httpx.Response(200, json={})], sleeps)
+    hd.request("GET", "/status")
+    assert 1 in sleeps
