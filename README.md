@@ -6,7 +6,7 @@ uv sync                                   # Python 3.12, google-adk, httpx
 cp .env.example .env                      # fill HELPDESK_KEY, HELPDESK_EMAIL (and GEMINI_API_KEY if not exported)
 uv run --env-file .env python run.py      # handle every open ticket once; one log line per ticket in logs/
 uv run --env-file .env python eval.py <label>   # eval on the 10 labelled examples (posts nothing)
-uv run pytest -q                          # 32 offline tests
+uv run pytest -q                          # 39 offline tests
 ```
 
 ## Decisions
@@ -28,7 +28,7 @@ uv run pytest -q                          # 32 offline tests
 *Assumptions:* a GDPR data request is a human task even if routine; a plan upgrade counts as a contract change (so a
 human handles it); spam/empty is the only reason to close; priority is judged on impact (see Eval). *Final run:* 30/30
 handled, 0 failed — 10 replies, 18 handoffs, 2 closes (`logs/run-20261118T161947Z.jsonl`). *AI tools:* built with Claude Code — brainstorm → written design → plan → test-first
-implementation, a separate reviewer agent on the final code. Every line was read and the eval was run by me.
+implementation, a separate reviewer agent on the final code.
 
 ## Reliability
 - **429**: wait `Retry-After` (max 10 times), retry. Calls are spaced ≥ 0.25 s (4/s) so it rarely happens.
