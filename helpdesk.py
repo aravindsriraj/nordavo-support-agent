@@ -5,6 +5,7 @@ import time
 import httpx
 
 BACKOFF = [0.5, 1, 2, 4, 8]  # waits between retries for 503 / network errors
+MAX_429_WAITS = 10
 
 
 class HelpdeskError(Exception):
@@ -39,7 +40,7 @@ class Helpdesk:
         self._last = time.monotonic()
 
     def request(self, method: str, path: str, json: dict | None = None, params: dict | None = None) -> dict:
-        backoff = list(BACKOFF)
+        backoff, waits_429 = list(BACKOFF), 0
         while True:
             self._throttle()
             try:
@@ -51,6 +52,9 @@ class Helpdesk:
                 self.sleep(backoff.pop(0))
                 continue
             if r.status_code == 429:
+                waits_429 += 1
+                if waits_429 > MAX_429_WAITS:
+                    raise HelpdeskError(429, _json(r))
                 try:
                     self.sleep(float(r.headers.get("Retry-After", 1)))
                 except ValueError:  # HTTP-date form

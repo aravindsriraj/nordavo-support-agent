@@ -31,11 +31,13 @@ handled, 0 failed — 11 replies, 17 handoffs, 2 closes (`logs/run-20261118T1610
 implementation, a separate reviewer agent on the final code. Every line was read and the eval was run by me.
 
 ## Reliability
-- **429**: wait `Retry-After`, retry. Calls are spaced ≥ 0.25 s (4/s) so it rarely happens.
+- **429**: wait `Retry-After` (max 10 times), retry. Calls are spaced ≥ 0.25 s (4/s) so it rarely happens.
 - **503**: retry after 0.5, 1, 2, 4, 8 s (nothing was saved). Network errors are retried the same way for GETs; a
   POST is never resent blindly — the code asks the server whether it was saved. If the helpdesk stays down, that
   ticket is logged `failed`, stays open, and the next run picks it up.
 - **409**: means "already answered" → logged `already_handled`, never retried.
+- **Other failures**: model calls time out after 120 s (→ fallback handoff); if listing tickets fails, the run stops
+  cleanly and a re-run continues with the tickets still open.
 - **Crash / re-run**: the helpdesk is the source of truth (no local state file to go stale). A run only lists open
   tickets, and before every POST it checks `GET /tickets/{id}` → `handled`. Tested by hard-killing `run.py` twice
   mid-run (it resumed at the next ticket) and by two runs racing each other: nothing was ever answered twice.

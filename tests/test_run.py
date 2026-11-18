@@ -36,3 +36,19 @@ def test_failed_ticket_does_not_stop_run(monkeypatch, tmp_path):
     counts, lines = go(monkeypatch, tmp_path, fake)
     assert [l["outcome"] for l in lines] == ["failed", "posted", "posted"]
     assert counts == {"failed": 1, "posted": 2}
+
+
+class BrokenListHD:
+    def open_tickets(self):
+        yield {"id": "T001"}
+        raise HelpdeskError(503)
+
+
+def test_listing_failure_ends_run_cleanly(monkeypatch, tmp_path):
+    async def fake(ticket, post):
+        return DEC
+    monkeypatch.setattr(run, "decide", fake)
+    log = tmp_path / "log.jsonl"
+    counts = asyncio.run(run.run(BrokenListHD(), str(log)))
+    assert counts == {"posted": 1, "listing_failed": 1}
+    assert len(log.read_text().splitlines()) == 1

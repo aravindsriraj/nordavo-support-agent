@@ -98,3 +98,10 @@ def test_429_unparseable_retry_after_waits_1s():
                   httpx.Response(200, json={})], sleeps)
     hd.request("GET", "/status")
     assert 1 in sleeps
+
+
+def test_429_gives_up_after_10_waits():
+    hd, calls = make([httpx.Response(429, headers={"Retry-After": "1"}) for _ in range(11)], [])
+    with pytest.raises(HelpdeskError) as e:
+        hd.request("GET", "/status")
+    assert e.value.status == 429 and len(calls) == 11

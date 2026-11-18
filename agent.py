@@ -141,8 +141,9 @@ def make_tools(ticket: dict, post: Callable[[str, dict], str], verify: Callable[
 MODEL = "gemini-3.8-flash"
 # Thinking levels, chosen by eval (see README): the default (high) spends ~7x the output tokens; low made the agent
 # invent facts the verifier then rejected. The verifier's narrower check works fine on low.
-AGENT_THINKING = {"thinking_config": {"thinking_level": "MEDIUM"}}
-VERIFIER_THINKING = {"thinking_config": {"thinking_level": "LOW"}}
+TIMEOUT = {"http_options": {"timeout": 120_000}}  # ms; a hung model call ends in the fallback handoff, not a hung run
+AGENT_THINKING = {"thinking_config": {"thinking_level": "MEDIUM"}, **TIMEOUT}
+VERIFIER_THINKING = {"thinking_config": {"thinking_level": "LOW"}, **TIMEOUT}
 FAQ_TEXT = (Path(__file__).parent / "faq.md").read_text()
 
 INSTRUCTION = f"""You triage support tickets for Roosterly, a Dutch shift-planning app for restaurants and shops.
