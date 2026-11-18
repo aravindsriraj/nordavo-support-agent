@@ -1,4 +1,5 @@
 """Roosterly helpdesk client: auth, rate limit, retries, and the never-answer-twice guard."""
+import json
 import os
 import time
 
@@ -87,6 +88,39 @@ class Helpdesk:
 
     def reset(self) -> dict:
         return self.request("POST", "/practice/reset")
+
+
+class State:
+    """Local record of tickets we already answered. Survives crashes (atomic write)."""
+
+    def __init__(self, path: str = "state.json"):
+        self.path = path
+        self.data = json.load(open(path)) if os.path.exists(path) else {}
+
+    def done(self, id: str) -> bool:
+        return id in self.data
+
+    def mark(self, id: str, outcome: str) -> None:
+        self.data[id] = outcome
+        with open(self.path + ".tmp", "w") as f:
+            json.dump(self.data, f, indent=1)
+        os.replace(self.path + ".tmp", self.path)
+
+
+def post_once(hd: Helpdesk, state: State, ticket_id: str, action: str, body: dict) -> str:
+    """Post a decision unless this ticket was already answered. Returns 'posted' or 'already_handled'."""
+    if state.done(ticket_id):
+        return "already_handled"
+    if is_handled(hd.get_ticket(ticket_id)):  # covers a crash between POST and state write
+        state.mark(ticket_id, "already_handled")
+        return "already_handled"
+    try:
+        hd.post_action(ticket_id, action, body)
+    except AlreadyHandled:
+        state.mark(ticket_id, "already_handled")
+        return "already_handled"
+    state.mark(ticket_id, "posted")
+    return "posted"
 
 
 def _json(r: httpx.Response) -> dict:
