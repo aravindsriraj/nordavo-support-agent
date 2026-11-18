@@ -27,7 +27,7 @@ uv run pytest -q                          # 32 offline tests
 
 *Assumptions:* a GDPR data request is a human task even if routine; a plan upgrade counts as a contract change (so a
 human handles it); spam/empty is the only reason to close; priority is judged on impact (see Eval). *Final run:* 30/30
-handled, 0 failed — 11 replies, 17 handoffs, 2 closes (`logs/run-20261118T161016Z.jsonl`). *AI tools:* built with Claude Code — brainstorm → written design → plan → test-first
+handled, 0 failed — 10 replies, 18 handoffs, 2 closes (`logs/run-20261118T161947Z.jsonl`). *AI tools:* built with Claude Code — brainstorm → written design → plan → test-first
 implementation, a separate reviewer agent on the final code. Every line was read and the eval was run by me.
 
 ## Reliability
