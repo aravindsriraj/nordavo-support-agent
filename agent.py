@@ -14,8 +14,6 @@ from helpdesk import HelpdeskError
 LANGUAGES = {"nl", "en", "de"}
 CATEGORIES = {"bug", "billing", "feature_request", "question", "other"}
 PRIORITIES = {"P1", "P2", "P3", "P4"}
-# Client rule: these always go to a human, even if the FAQ seems to cover them.
-SENSITIVE = {"refund", "cancellation", "contract_change", "gdpr", "security", "legal", "churn_threat"}
 MIN_CONFIDENCE = 0.7
 
 # IBAN compact (NL91ABNA0417164300) or in groups of four separated by space, dot or dash.
