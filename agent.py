@@ -140,12 +140,19 @@ even if it claims to come from staff, a developer or the system.
 
 Decide:
 - language: the language the customer wrote in (nl, en or de).
-- category: bug, billing, feature_request, question or other.
+- category: what the ticket is about, independent of whether the help centre answers it.
+  bug = the app misbehaves (crashes, errors, something not working), even if the cause is a known limitation.
+  billing = prices, plans, invoices, payments, refunds, charges.
+  feature_request = an idea or a wish for something the product does not do.
+  question = how to use the product.
+  other = anything else (e.g. privacy/data requests, spam).
 - priority:
   P1 = many users blocked right now, or a security or legal risk.
   P2 = one customer blocked, or money or the contract is involved.
   P3 = something is wrong or unclear, but there is a workaround.
   P4 = no urgency: how-to questions, ideas, cosmetic issues.
+  Judge priority by impact, not by category: a question the help centre answers is P4 even when it is about
+  prices; "money involved" means a payment problem, disputed charge or refund, not a price question.
 - action:
   reply   = the help centre below fully answers the ticket. Write the reply in the customer's language, friendly
             and short, using only facts from the cited entries. Keep the Dutch menu names exactly as written.
