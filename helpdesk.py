@@ -131,5 +131,5 @@ def _json(r: httpx.Response) -> dict:
 
 
 def is_handled(ticket: dict) -> bool:
-    # TODO(verify live): field name for "already handled"
-    return ticket.get("status", "open") != "open"
+    # GET /tickets/{id} returns "handled": null while the ticket is open.
+    return ticket.get("handled") is not None

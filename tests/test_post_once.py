@@ -5,7 +5,7 @@ from helpdesk import AlreadyHandled, HelpdeskError, State, post_once
 
 class FakeHD:
     def __init__(self, ticket=None, raises=None):
-        self.ticket = ticket or {"id": "T001", "status": "open"}
+        self.ticket = ticket or {"id": "T001", "handled": None}
         self.raises = raises
         self.posts, self.gets = [], 0
 
@@ -38,7 +38,7 @@ def test_skips_when_state_says_done(tmp_path):
 
 def test_skips_when_server_says_handled(tmp_path):
     s = State(str(tmp_path / "s.json"))
-    hd = FakeHD(ticket={"id": "T001", "status": "handled"})
+    hd = FakeHD(ticket={"id": "T001", "handled": {"action": "reply"}})
     assert post_once(hd, s, "T001", "reply", {}) == "already_handled"
     assert hd.posts == []
     assert s.done("T001")
