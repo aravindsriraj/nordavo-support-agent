@@ -79,6 +79,9 @@ def make_tools(ticket: dict, post: Callable[[str, dict], str], verify: Callable[
         draft = mask_payment(draft_reply)
         v = verify(ticket=ticket, draft=draft, faq_texts=[faq[f] for f in faq_ids], language=language)
         decision["verification"] = v
+        vt = decision.setdefault("verify_tokens", {"input": 0, "output": 0})  # summed: model may retry reply
+        for k, n in v.get("tokens", {}).items():
+            vt[k] += n
         if not v.get("grounded_in_faq") or v.get("detected_language") != language:
             return refuse(f"reply check failed ({v.get('issue') or 'wrong language'}); use handoff instead")
         body = dict(language=language, category=category, priority=priority, reason=mask_payment(reason),
@@ -211,11 +214,9 @@ Help-centre entries:
         config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=Verdict))
     v = Verdict.model_validate_json(r.text).model_dump()
     v["grounded_in_faq"] = v["grounded_in_faq"] and v.pop("answers_the_question")
-    _add_usage(verify_reply.usage, r.usage_metadata)
+    v["tokens"] = {"input": 0, "output": 0}
+    _add_usage(v["tokens"], r.usage_metadata)
     return v
-
-
-verify_reply.usage = {"input": 0, "output": 0}
 
 
 def _add_usage(acc: dict, um) -> None:
@@ -249,6 +250,8 @@ async def decide(ticket: dict, post: Callable[[str, dict], str], verify=verify_r
     except Exception as e:  # model or tool failure: never leave the customer unanswered
         decision["tokens"] = {"input": 0, "output": 0}
         decision["error"] = f"{type(e).__name__}: {e}"
+    for k, n in decision.get("verify_tokens", {}).items():
+        decision["tokens"][k] += n
     if not decision.get("outcome"):
         decision["fallback"] = True
         body = dict(language="nl", category="other", priority="P3",
