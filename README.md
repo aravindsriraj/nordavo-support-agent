@@ -1,4 +1,4 @@
-# Roosterly support-ticket agent
+# Support-ticket agent
 
 ## How to run
 ```bash
