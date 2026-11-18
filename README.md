@@ -55,12 +55,15 @@ and has a *different* model (`gemini-3.5-flash`) judge reply quality. Results in
 | fix step 2: + priority by impact | 10 | 10 | **9** | 10 | 0 | 6/6 | 1.13 |
 | thinking medium/low | 10 | 10 | 9 | 10 | 0 | 6/6 | 0.78 |
 | final: + review fixes | 10 | 10 | 9 | 10 | 0 | 6/6 | **0.83** |
+| tried, reverted: "privacy request is P2" (×2) | 10 | 10 | 9 | 10 | 0 | 6/6 | 0.71–0.76 |
 
 **The fix.** The agent called answerable tickets `question` even when they were about a crash or a price. Adding
 "category is what the ticket is about" fixed category but broke priority: billing became "money involved → P2". One more
 line ("priority by impact; a price question is P4") fixed both. Remaining miss: a GDPR request rated P1 instead of P2
 (still handed off). Then I lowered thinking: `low` for the agent made it invent facts (the verifier caught them; two
-replies became handoffs), so the agent uses `medium`, the verifier `low`.
+replies became handoffs), so the agent uses `medium`, the verifier `low`. Last, telling the model "a privacy request is
+P2" fixed the GDPR miss but flipped a crash ticket from P3 to P2 in two runs: no net gain, so I reverted it rather than
+tune the prompt to ten examples.
 **Cost** (final eval, gemini-3.8-flash at $0.75 in / $3.75 out per 1M tokens, verifier included, judge excluded):
 62,551 input + 9,598 output tokens for 10 tickets → (62,551 × 0.75 + 9,598 × 3.75) / 1M = $0.083 → **$0.83 per 100**.
 
