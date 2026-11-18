@@ -130,6 +130,10 @@ def make_tools(ticket: dict, post: Callable[[str, dict], str], verify: Callable[
 # ---------------------------------------------------------------- model side
 
 MODEL = "gemini-3.8-flash"
+# Thinking levels, chosen by eval (see README): the default (high) spends ~7x the output tokens; low made the agent
+# invent facts the verifier then rejected. The verifier's narrower check works fine on low.
+AGENT_THINKING = {"thinking_config": {"thinking_level": "MEDIUM"}}
+VERIFIER_THINKING = {"thinking_config": {"thinking_level": "LOW"}}
 FAQ_TEXT = (Path(__file__).parent / "faq.md").read_text()
 
 INSTRUCTION = f"""You triage support tickets for Roosterly, a Dutch shift-planning app for restaurants and shops.
@@ -218,7 +222,8 @@ Help-centre entries:
 </reply>"""
     r = _genai().models.generate_content(
         model=model, contents=prompt,
-        config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=Verdict))
+        config=types.GenerateContentConfig(response_mime_type="application/json", response_schema=Verdict,
+                                           **VERIFIER_THINKING))
     v = Verdict.model_validate_json(r.text).model_dump()
     v["grounded_in_faq"] = v["grounded_in_faq"] and v.pop("answers_the_question")
     v["tokens"] = {"input": 0, "output": 0}
@@ -251,7 +256,10 @@ async def decide(ticket: dict, post: Callable[[str, dict], str], verify=verify_r
     from google.adk.agents import Agent
 
     tools, decision = make_tools(ticket, post, verify, faq or load_faq())
-    ag = Agent(name="triage", model=MODEL, instruction=INSTRUCTION, tools=tools)
+    from google.genai import types
+
+    ag = Agent(name="triage", model=MODEL, instruction=INSTRUCTION, tools=tools,
+               generate_content_config=types.GenerateContentConfig(**AGENT_THINKING))
     try:
         decision["tokens"] = await _run_agent(ag, format_ticket(ticket))
     except Exception as e:  # model or tool failure: never leave the customer unanswered
